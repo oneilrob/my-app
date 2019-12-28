@@ -17,6 +17,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "prebuild": "cd $(pwd) && npm ci",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
