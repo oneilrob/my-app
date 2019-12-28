@@ -3,10 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.4.0",
-    "@testing-library/user-event": "^7.2.1",
-    "@types/jest": "^24.0.25",
     "@types/node": "^12.12.22",
     "@types/react": "^16.9.17",
     "@types/react-dom": "^16.9.4",
@@ -19,7 +15,6 @@
     "start": "react-scripts start",
     "prebuild": "cd $(pwd) && npm ci",
     "build": "react-scripts build",
-    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
