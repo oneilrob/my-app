@@ -1,12 +1,163 @@
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+type NullableString = string | null;
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+interface SquareProps {
+    value: NullableString
+    onClick: () => void
+}
+
+interface BoardState {
+    squares: NullableString[]
+    xIsNext: boolean
+}
+
+interface GameState {
+    history: NullableString[][]
+    stepNumber: number
+    xIsNext: boolean
+}
+
+// note the props inside did not have to be typed becase of generic
+export const Square: FunctionComponent<SquareProps> = (props): JSX.Element =>
+    <button className="square" onClick={props.onClick}>
+        {props.value}
+    </button>
+
+interface BoardProps {
+    squares: NullableString[]
+    onClick: (i: number) => void
+}
+
+class Board extends React.Component<BoardProps, BoardState> {
+    renderSquare(i: number): JSX.Element {
+        return (
+            <Square
+                value={this.props.squares[i]}
+                onClick={() => this.props.onClick(i)}
+            />
+        );
+    }
+
+    render() {
+        return (
+            <div>
+                <div className="board-row">
+                    {this.renderSquare(0)}
+                    {this.renderSquare(1)}
+                    {this.renderSquare(2)}
+                </div>
+                <div className="board-row">
+                    {this.renderSquare(3)}
+                    {this.renderSquare(4)}
+                    {this.renderSquare(5)}
+                </div>
+                <div className="board-row">
+                    {this.renderSquare(6)}
+                    {this.renderSquare(7)}
+                    {this.renderSquare(8)}
+                </div>
+            </div>
+        );
+    }
+}
+
+class Game extends React.Component<{}, GameState> {
+    constructor(props: Readonly<{}>) {
+        super(props)
+
+        this.state = {
+            history: [Array<NullableString>(9).fill(null)],
+            stepNumber: 0,
+            xIsNext: true,
+        }
+    }
+
+    render() {
+        const history = this.state.history;
+        const current = history[this.state.stepNumber];
+        const winner = calculateWinner(current);
+
+        const moves = history.map((step, move) => {
+            const desc = move
+                ? 'Go to move #' + move
+                : 'Go to start';
+            return (
+                <li key={move}><button onClick={() => this.jumpTo(move)}>{desc}</button></li>
+            );
+        });
+
+        let status;
+        if (winner) {
+            status = 'Winner: ' + winner;
+        } else {
+            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+        }
+
+        return (
+            <div className="game">
+                <div className="game-board">
+                    <Board
+                        squares={current}
+                        onClick={(i) => this.handleClick(i)}
+                    />
+                </div>
+                <div className="game-info">
+                    <div>{status}</div>
+                    <ol>{moves}</ol>
+                </div>
+            </div>
+        );
+    }
+
+    jumpTo(move: number): void {
+        this.setState({
+            stepNumber: move,
+            xIsNext: (move % 2) === 0,
+        });
+    }
+
+    handleClick = (i: number): void => {
+        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const current = history[history.length - 1].slice();
+
+        if (calculateWinner(current) || current[i]) {
+            return;
+        }
+        current[i] = this.state.xIsNext ? 'X' : 'O';
+        this.setState({
+            history: history.concat([current]),
+            stepNumber: history.length,
+            xIsNext: !this.state.xIsNext,
+        });
+    }
+}
+
+function calculateWinner(squares: Array<NullableString>): NullableString {
+    const lines = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+    ];
+    for (let i = 0; i < lines.length; i++) {
+        const [a, b, c] = lines[i];
+        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+            return squares[a];
+        }
+    }
+    return null;
+}
+
+// ========================================
+
+ReactDOM.render(
+    <Game />,
+    document.getElementById('root')
+);  
